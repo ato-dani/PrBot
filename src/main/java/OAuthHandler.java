@@ -1,3 +1,4 @@
+import com.slack.api.Slack;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
@@ -36,4 +37,11 @@ public class OAuthHandler {
         //todo: actually save these values
         return true;
     }
+
+    public static boolean authorizeSlack(String apiKey, String apiSecretKey) throws Exception{
+        //todo: everything
+        return false;
+    }
+
+
 }
