@@ -1,7 +1,3 @@
-import com.github.alexdlaird.ngrok.NgrokClient;
-import com.github.alexdlaird.ngrok.protocol.CreateTunnel;
-import com.github.alexdlaird.ngrok.protocol.Tunnel;
-import com.slack.api.Slack;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -28,12 +24,12 @@ public class RedirectServer {
     }
 
     //todo: will need to be modified later. for now just a clone of the twitter handler
-    private class SlackAuthorizationHandler implements HttpHandler{
+    private class RedditAuthorizationHandler implements HttpHandler{
         @Override
         public void handle(HttpExchange ex) throws IOException{
-            slackResponse = ex.getRequestURI().toString();
+            redditResponse = ex.getRequestURI().toString();
             OutputStream out = ex.getResponseBody();
-            String responsePage = FileIO.readFile(SLACK_REDIRECT_PAGE);
+            String responsePage = FileIO.readFile(REDDIT_REDIRECT_PAGE);
             ex.sendResponseHeaders(200, responsePage.length());
             out.write(responsePage.getBytes(StandardCharsets.UTF_8));
             out.flush();
@@ -43,23 +39,21 @@ public class RedirectServer {
 
     final int SERVER_PORT = 1337;
     final String TWITTER_REDIRECT_PAGE = "src/main/html/twitter_redirect.html";
-    final String SLACK_REDIRECT_PAGE = "src/main/html/slack_redirect.html";
+    final String REDDIT_REDIRECT_PAGE = "src/main/html/reddit_redirect.html";
 
     private HttpServer server;
-    private Tunnel tunnel;
     private TwitterAuthorizationHandler twitterAuthorizationHandler;
-    private SlackAuthorizationHandler slackAuthorizationHandler;
+    private RedditAuthorizationHandler redditAuthorizationHandler;
     private String twitterResponse = null;
-    private String slackResponse = null;
+    private String redditResponse = null;
 
     public RedirectServer() throws IOException{
         server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
         twitterAuthorizationHandler = new TwitterAuthorizationHandler();
         server.createContext("/twitterauth", twitterAuthorizationHandler);
-        slackAuthorizationHandler = new SlackAuthorizationHandler();
-        server.createContext("/slackauth", slackAuthorizationHandler);
+        redditAuthorizationHandler = new RedditAuthorizationHandler();
+        server.createContext("/redditauth", redditAuthorizationHandler);
         server.setExecutor(null);
-        tunnel = generateTunnel();
     }
 
     public void startUp(){
@@ -85,18 +79,7 @@ public class RedirectServer {
         return twitterResponse;
     }
 
-    public String getSlackResponse(){
-        return slackResponse;
-    }
-
-    public String getSlackRedirectUrl(){
-        return tunnel.getPublicUrl().replaceAll("http", "https") + "/slackauth";
-    }
-
-    private Tunnel generateTunnel(){
-        NgrokClient rock = new NgrokClient.Builder().build();
-        CreateTunnel createTunnel = new CreateTunnel.Builder().withAddr(SERVER_PORT).build();
-        Tunnel tunnel = rock.connect(createTunnel);
-        return tunnel;
+    public String getRedditResponse(){
+        return redditResponse;
     }
 }
