@@ -3,6 +3,14 @@ import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
+import net.dean.jraw.RedditClient;
+import net.dean.jraw.http.NetworkAdapter;
+import net.dean.jraw.http.OkHttpNetworkAdapter;
+import net.dean.jraw.http.UserAgent;
+import net.dean.jraw.oauth.Credentials;
+import net.dean.jraw.oauth.OAuthHelper;
+import net.dean.jraw.oauth.StatefulAuthHelper;
+
 import java.awt.*;
 import java.net.URI;
 import java.security.SecureRandom;
@@ -38,26 +46,35 @@ public class OAuthHandler {
         return true;
     }
 
-    public static boolean authorizeReddit(String apiKey, String apiSecretKey) throws Exception{
+    public static boolean authorizeReddit(String clientId, String clientSecret) throws Exception {
         RedirectServer server = new RedirectServer();
         server.startUp();
-        String nonce = generateNonce(16);
-        String authURL = "https://www.reddit.com/api/v1/authorize?client_id=" + apiKey + "&response_type=TYPE&state=" +
-                nonce + "&redirect_uri=http://127.0.0.1:1337/redditauth&duration=permanent&scope=edit,read,save,submit";
-        try{
+        // System.out.println("Generate Request Url2 Called");
+        Credentials credentials = Credentials.webapp(clientId, clientSecret, server.getRedditBaseUrl());
+        UserAgent userAgent = new UserAgent("prBotCs321", "com.example.Prbot", "v0.1", "prbot");
+        NetworkAdapter networkAdapter = new OkHttpNetworkAdapter(userAgent);
+        final StatefulAuthHelper helper = OAuthHelper.interactive(networkAdapter, credentials);
+        String authUrl = helper.getAuthorizationUrl(true, false, "submit", "identity");
+        try {
             Desktop desktop = Desktop.getDesktop();
-            desktop.browse(new URI(authURL));
+            desktop.browse(new URI(authUrl));
+        } catch (Exception e) {
+            System.out.println("Error: " + e);
+            e.printStackTrace();
         }
-        catch(Exception e){
-            //todo: print url so user can copy+paste
-        }
-        while(server.getRedditResponse() == null){
-            //do nothing and wait while the user finishes up in their browser
+        while (server.getRedditResponse() == null) {
+            // do nothing and wait while the user finishes up in their browser
             Thread.sleep(1);
         }
-        System.out.println("DEBUG:" + server.getRedditResponse());
+        // System.out.println("Reddit response is " + server.getRedditResponse());
+        String url = server.getRedditFinalUrl();
         server.shutDown();
-        return false;
+        RedditClient reddit = helper.onUserChallenge(url);
+        System.out.println("out of main status: " + helper.getAuthStatus());
+        // TODO: Save the access token in some way possible a cookie
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo(reddit.getAuthManager().getAccessToken(),
+                reddit.getAuthManager().getCurrent().getExpiration().toString());
+        return true;
     }
 
     //https://mkyong.com/java/java-how-to-generate-a-random-12-bytes/

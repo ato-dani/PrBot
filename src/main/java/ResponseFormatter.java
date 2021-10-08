@@ -12,10 +12,10 @@ public class ResponseFormatter {
   }
 
   public boolean getSuccessStatus() {
-    return successStatus;
+    return this.successStatus;
   }
 
   public String getMessage() {
-    return message;
+    return this.message;
   }
 }

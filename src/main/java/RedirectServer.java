@@ -24,7 +24,7 @@ public class RedirectServer {
     }
 
     //todo: will need to be modified later. for now just a clone of the twitter handler
-    private class RedditAuthorizationHandler implements HttpHandler{
+    private class RedditAuthorizationHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange ex) throws IOException{
             redditResponse = ex.getRequestURI().toString();
@@ -46,6 +46,7 @@ public class RedirectServer {
     private RedditAuthorizationHandler redditAuthorizationHandler;
     private String twitterResponse = null;
     private String redditResponse = null;
+    private String redditBaseUrl = "http://127.0.0.1:1337/redditauth";
 
     public RedirectServer() throws IOException{
         server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
@@ -79,7 +80,17 @@ public class RedirectServer {
         return twitterResponse;
     }
 
-    public String getRedditResponse(){
+    public String getRedditBaseUrl() {
+        return redditBaseUrl;
+    }
+
+    public String getRedditResponse() {
         return redditResponse;
+    }
+
+    public String getRedditFinalUrl() {
+        // final url consists of base url with randomly generated state as query used
+        // for security
+        return redditBaseUrl + redditResponse;
     }
 }
