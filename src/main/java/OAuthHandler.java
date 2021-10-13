@@ -15,9 +15,20 @@ import java.awt.*;
 import java.net.URI;
 import java.security.SecureRandom;
 
+/**
+ * Handles the complicated OAuth2 login processes using a dummy webserver.
+ */
 public class OAuthHandler {
 
-    //based on this: https://twitter4j.org/en/code-examples.html
+    /**
+     * Login to twitter via OAuth2, and get the login access token and secret
+     * based on this: https://twitter4j.org/en/code-examples.html
+     *
+     * @param apiKey        Twitter developer API key.
+     * @param apiSecretKey  Twitter developer API secret.
+     * @return              true if successful.
+     * @throws Exception    RedirectServer threw an exception.
+     */
     public static boolean authorizeTwitter(String apiKey, String apiSecretKey) throws Exception {
         RedirectServer server = new RedirectServer();
         server.startUp();
@@ -46,6 +57,14 @@ public class OAuthHandler {
         return true;
     }
 
+    /**
+     * Login to Reddit via OAuth2, and get the login access token
+     *
+     * @param clientId      Reddit developer API client ID.
+     * @param clientSecret  Reddit developer API client secret.
+     * @return              true if successful.
+     * @throws Exception    RedirectServer threw an exception.
+     */
     public static boolean authorizeReddit(String clientId, String clientSecret) throws Exception {
         RedirectServer server = new RedirectServer();
         server.startUp();
@@ -77,7 +96,12 @@ public class OAuthHandler {
         return true;
     }
 
-    //https://mkyong.com/java/java-how-to-generate-a-random-12-bytes/
+    /**
+     * Generate a nonce (random string of bytes)
+     * based on: https://mkyong.com/java/java-how-to-generate-a-random-12-bytes/
+     * @param numBytes Length of nonce in bytes
+     * @return Hex-encoded nonce string.
+     */
     private static String generateNonce(int numBytes){
         byte[] nonce = new byte[numBytes];
         new SecureRandom().nextBytes(nonce);

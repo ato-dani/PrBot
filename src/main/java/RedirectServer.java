@@ -7,10 +7,20 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
-//many thanks to this tutorial: https://dzone.com/articles/simple-http-server-in-java
+/**
+ * Dummy websever that acts as a redirect target for OAuth2 authentication
+ * many thanks to this tutorial: https://dzone.com/articles/simple-http-server-in-java
+ */
 public class RedirectServer {
-    //copy the response from the Twitter API to twitterResponse, and display the landing page
+    /**
+     * Copy the response from the Twitter API to twitterResponse, and display the landing page
+     */
     private class TwitterAuthorizationHandler implements HttpHandler{
+        /**
+         * Handle requests to the Twitter redirect page
+         * @param ex            Incoming request
+         * @throws IOException  Incapable of reading landing page HTML file
+         */
         @Override
         public void handle(HttpExchange ex) throws IOException{
             twitterResponse = ex.getRequestURI().toString();
@@ -23,8 +33,15 @@ public class RedirectServer {
         }
     }
 
-    //todo: will need to be modified later. for now just a clone of the twitter handler
+    /**
+     * Copy the response from the Twitter API to twitterResponse, and display the landing page
+     */
     private class RedditAuthorizationHandler implements HttpHandler {
+        /**
+         * Handle requests to the Twitter redirect page
+         * @param ex            Incoming request
+         * @throws IOException  Incapable of reading landing page HTML file
+         */
         @Override
         public void handle(HttpExchange ex) throws IOException{
             redditResponse = ex.getRequestURI().toString();
@@ -48,6 +65,10 @@ public class RedirectServer {
     private String redditResponse = null;
     private String redditBaseUrl = "http://127.0.0.1:1337/redditauth";
 
+    /**
+     * Generate a RedirectServer, and initialize the landing pages
+     * @throws IOException  Invalid server port given.
+     */
     public RedirectServer() throws IOException{
         server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
         twitterAuthorizationHandler = new TwitterAuthorizationHandler();
@@ -57,6 +78,9 @@ public class RedirectServer {
         server.setExecutor(null);
     }
 
+    /**
+     * Spin up the RedirectServer.
+     */
     public void startUp(){
         try{
             server.start();
@@ -66,7 +90,10 @@ public class RedirectServer {
         }
     }
 
-    //server MUST be shut down when done, or else it runs in the background, hogging the port
+    /**
+     * Shut down the RedirectServer.
+     * server MUST be shut down when done, or else it runs in the background, hogging the port
+     */
     public void shutDown(){
         try{
             server.stop(1);
@@ -88,6 +115,10 @@ public class RedirectServer {
         return redditResponse;
     }
 
+    /**
+     * Final url consists of base url with randomly generated state as query used for security
+     * @return  Reddit final URL
+     */
     public String getRedditFinalUrl() {
         // final url consists of base url with randomly generated state as query used
         // for security

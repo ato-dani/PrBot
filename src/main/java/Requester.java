@@ -62,8 +62,8 @@ public class Requester {
      */
     // I am creating this because the makeGETRequest doesn't work(have some bugs)
     // and I couldn't fix them
-    public Object makeGETRequestV2(String requestUrl, Map<String, String> parameters, HttpHeaders headers,
-            Type responseType) {
+    public Object makeGETRequest(String requestUrl, Map<String, String> parameters, HttpHeaders headers,
+                                 Type responseType) {
         Object respObject = null;
         try {
             GenericUrl url = new GenericUrl(requestUrl);
@@ -110,8 +110,8 @@ public class Requester {
      * @return response object with the response parsed based on the type given
      *         above.
      */
-    public Object makePOSTRequestV2(String requestUrl, Map<String, String> data, Map<String, String> parameters,
-            HttpHeaders headers, Type responseType) {
+    public Object makePOSTRequest(String requestUrl, Map<String, String> data, Map<String, String> parameters,
+                                  HttpHeaders headers, Type responseType) {
         Object respObject = null;
         try {
             GenericUrl url = new GenericUrl(requestUrl);
@@ -143,62 +143,6 @@ public class Requester {
         }
 
         return respObject;
-    }
-    public static String makeGETRequest(String url, Map<String, String> parameters){
-        try{
-            HttpURLConnection connection = (HttpURLConnection) (new URL(url)).openConnection();
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            for(Map.Entry<String, String> entry : parameters.entrySet()) {
-                connection.setRequestProperty(entry.getKey(), entry.getValue());
-            }
-            out.flush();
-            out.close();
-            connection.setRequestProperty("Content-Type", "application/json");
-            int status = connection.getResponseCode();
-            //TODO: actually pay attention to this
-            System.out.println("STATUS CODE: " + status);
-            connection.disconnect();
-            return inputStreamToString(connection.getInputStream());
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            //TODO: should probably do more error checking than just this...
-            return null;
-        }
-    }
-
-    public static String makePOSTRequest(String url, Map<String, String> parameters, String data) {
-        try{
-            HttpURLConnection connection = (HttpURLConnection) (new URL(url)).openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            for(Map.Entry<String, String> entry : parameters.entrySet()){
-                connection.setRequestProperty(entry.getKey(), entry.getValue());
-            }
-            if(data != null) {
-                OutputStream out = connection.getOutputStream();
-                OutputStreamWriter osw = new OutputStreamWriter(out, "UTF-8");
-                osw.write(data);
-                osw.flush();
-                osw.close();
-                out.close();
-            }
-            connection.connect();
-            int status = connection.getResponseCode();
-            System.out.println("MESSAGE RETURNED : " + connection.getResponseMessage());
-            //todo: actually pay attention to this
-            System.out.println("STATUS CODE: " + status);
-            connection.disconnect();
-            return "";
-            // return inputStreamToString(connection.getInputStream());
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            //TODO: should probably do more error checking than just this...
-            return null;
-        }
     }
 
     public static String buildParameterString(Map<String, String> parameters) throws UnsupportedEncodingException{
@@ -242,6 +186,13 @@ public class Requester {
         }
         return (query.substring(query.indexOf(queryName)).split(queriesDelimeter)[0]).split(queryValueDelimeter)[1];
     }
+
+    /**
+     * Convert an InputStream to a String of its contents.
+     * @param inputStream   InputStream to convert.
+     * @return              String contents.
+     * @throws IOException  Incapable of reading InputStream.
+     */
     public static String inputStreamToString(InputStream inputStream) throws IOException{
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[8192];

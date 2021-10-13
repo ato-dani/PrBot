@@ -1,7 +1,15 @@
 import java.io.*;
 
+/**
+ * Basic text file input/output handler.
+ */
 public class FileIO {
 
+    /**
+     * Reads in a text file as a string
+     * @param filepath  Filepath of the text file.
+     * @return          Contents of the text file.
+     */
     public static String readFile(String filepath){
         try {
             File file = new File(filepath);
@@ -24,6 +32,12 @@ public class FileIO {
         }
     }
 
+    /**
+     * Writes a string out to a text file. Will overwrite if file already exists.
+     * @param filepath  Filepath of the text file.
+     * @param contents  Text to save.
+     * @return          true on success.
+     */
     public static boolean writeFile(String filepath, String contents){
         try{
             File file = new File(filepath);

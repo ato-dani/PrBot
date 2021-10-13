@@ -99,9 +99,9 @@ public class RedditMessagePoster implements MessagePoster {
     parameters.put("user", "somename");
     System.out.println("Request Factory is " + requestFactory);
     requester.setReqFactory(getRequestFactory(accessTokenInfo.getAccessToken()));
-    requester.makeGETRequestV2(KARMA_API, parameters, null, null);
+    requester.makeGETRequest(KARMA_API, parameters, null, null);
     // The response is parsed for use since we told it what fields to expect
-    RedditResponseType response = (RedditResponseType) requester.makeGETRequestV2(KARMA_API, null, null, responseType);
+    RedditResponseType response = (RedditResponseType) requester.makeGETRequest(KARMA_API, null, null, responseType);
     System.out.println("Response: " + response.toString());
     System.out.println("response kind " + response.kind);
   }
@@ -112,7 +112,7 @@ public class RedditMessagePoster implements MessagePoster {
     Type identityResponseType = new TypeToken<RedditIdentityResponse>() {
     }.getType();
     requester.setReqFactory(getRequestFactory(accessTokenInfo.getAccessToken()));
-    RedditIdentityResponse response = (RedditIdentityResponse) requester.makeGETRequestV2(IDENTITY_API, null, null,
+    RedditIdentityResponse response = (RedditIdentityResponse) requester.makeGETRequest(IDENTITY_API, null, null,
         identityResponseType);
     username = response.getName();
     System.out.println("username ? " + response.getName());
@@ -139,7 +139,7 @@ public class RedditMessagePoster implements MessagePoster {
     data.put("send_replies", "true");
     data.put("api_type", "json");
     System.out.println("Request Factory is " + requestFactory);
-    RedditSubmitPostResponse response = (RedditSubmitPostResponse) requester.makePOSTRequestV2(SUBMIT_POST_API, data,
+    RedditSubmitPostResponse response = (RedditSubmitPostResponse) requester.makePOSTRequest(SUBMIT_POST_API, data,
         parameters, null, submitPostResponseType);
     System.out.println("Success ? " + response.success);
     if (response.getSuccess()) {
