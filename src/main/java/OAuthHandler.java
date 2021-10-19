@@ -65,7 +65,8 @@ public class OAuthHandler {
      * @return              true if successful.
      * @throws Exception    RedirectServer threw an exception.
      */
-    public static boolean authorizeReddit(String clientId, String clientSecret) throws Exception {
+    public static AccessTokenInfo authorizeReddit(String clientId, String clientSecret) throws Exception {
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo(null, null);
         RedirectServer server = new RedirectServer();
         server.startUp();
         // System.out.println("Generate Request Url2 Called");
@@ -86,14 +87,23 @@ public class OAuthHandler {
             Thread.sleep(1);
         }
         // System.out.println("Reddit response is " + server.getRedditResponse());
-        String url = server.getRedditFinalUrl();
+        URI url = new URI(server.getRedditFinalUrl());
         server.shutDown();
-        RedditClient reddit = helper.onUserChallenge(url);
-        System.out.println("out of main status: " + helper.getAuthStatus());
-        // TODO: Save the access token in some way possible a cookie
-        AccessTokenInfo accessTokenInfo = new AccessTokenInfo(reddit.getAuthManager().getAccessToken(),
+        if (server.redditAuthorizationHasError(url)) {
+            // user declined
+            // Send empty token or something
+            return new AccessTokenInfo(null, null);
+        }
+        try {
+            RedditClient reddit = helper.onUserChallenge(url.toString());
+            System.out.println("out of main status: " + helper.getAuthStatus());
+            // TODO: Save the access token in some way possible a cookie
+            accessTokenInfo = new AccessTokenInfo(reddit.getAuthManager().getAccessToken(),
                 reddit.getAuthManager().getCurrent().getExpiration().toString());
-        return true;
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        }
+        return accessTokenInfo;
     }
 
     /**

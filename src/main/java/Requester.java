@@ -176,13 +176,13 @@ public class Requester {
      * 
      * @param query     string of parameters separated by &
      * @param queryName the key whose value we are looking for
-     * @return The value of the query or empty string if the key was not found
+     * @return The value of the query or null if the key was not found
      */
     public static String getQueryValue(String query, String queryName) {
         String queriesDelimeter = "&";
         String queryValueDelimeter = "=";
         if (query == null || query.indexOf(queryName) == -1) {
-            return "";
+            return null;
         }
         return (query.substring(query.indexOf(queryName)).split(queriesDelimeter)[0]).split(queryValueDelimeter)[1];
     }

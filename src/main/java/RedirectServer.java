@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -28,7 +29,7 @@ public class RedirectServer {
             String responsePage = FileIO.readFile(TWITTER_REDIRECT_PAGE);
             ex.sendResponseHeaders(200, responsePage.length());
             out.write(responsePage.getBytes(StandardCharsets.UTF_8));
-            out.flush();
+        out.flush();
             out.close();
         }
     }
@@ -46,7 +47,15 @@ public class RedirectServer {
         public void handle(HttpExchange ex) throws IOException{
             redditResponse = ex.getRequestURI().toString();
             OutputStream out = ex.getResponseBody();
-            String responsePage = FileIO.readFile(REDDIT_REDIRECT_PAGE);
+            String responsePage = null;
+
+            if (redditAuthorizationHasError(ex.getRequestURI())) {
+                // Error happened when authorizing, tell user to reauthorize
+                responsePage = FileIO.readFile(REDDIT_ERROR_PAGE);
+            } else {
+                // while token wait and then send the token too
+                responsePage = FileIO.readFile(REDDIT_REDIRECT_PAGE);
+            }
             ex.sendResponseHeaders(200, responsePage.length());
             out.write(responsePage.getBytes(StandardCharsets.UTF_8));
             out.flush();
@@ -57,13 +66,14 @@ public class RedirectServer {
     final int SERVER_PORT = 1337;
     final String TWITTER_REDIRECT_PAGE = "src/main/html/twitter_redirect.html";
     final String REDDIT_REDIRECT_PAGE = "src/main/html/reddit_redirect.html";
+    final String ERROR_PAGE = "src/main/html/error.html";
 
     private HttpServer server;
     private TwitterAuthorizationHandler twitterAuthorizationHandler;
     private RedditAuthorizationHandler redditAuthorizationHandler;
     private String twitterResponse = null;
     private String redditResponse = null;
-    private String redditBaseUrl = "http://127.0.0.1:1337/redditauth";
+    private String redditBaseUrl = "http://localhost:1337/redditauth";
 
     /**
      * Generate a RedirectServer, and initialize the landing pages
@@ -115,7 +125,18 @@ public class RedirectServer {
         return redditResponse;
     }
 
-    /**
+    /*
+     * Uri will have a query parameter "error" if the authorization process resulted
+     * in an error.
+     * 
+     * @param url the url the user is redirected to from reddit
+     * @return true if the authorization process had any error
+     */
+    public Boolean redditAuthorizationHasError(URI url) {
+        String errorQueryName = "error";
+        return Requester.getQueryValue(url.getQuery(), errorQueryName) != null;
+    }
+     /**
      * Final url consists of base url with randomly generated state as query used for security
      * @return  Reddit final URL
      */
