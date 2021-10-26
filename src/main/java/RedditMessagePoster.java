@@ -83,7 +83,6 @@ public class RedditMessagePoster implements MessagePoster {
         }
       });
     }
-    System.out.println("After req factory set: " + requestFactory);
     return requestFactory;
   }
 
@@ -97,13 +96,10 @@ public class RedditMessagePoster implements MessagePoster {
     }.getType();
     Map<String, String> parameters = new HashMap<>();
     parameters.put("user", "somename");
-    System.out.println("Request Factory is " + requestFactory);
     requester.setReqFactory(getRequestFactory(accessTokenInfo.getAccessToken()));
     requester.makeGETRequest(KARMA_API, parameters, null, null);
     // The response is parsed for use since we told it what fields to expect
     RedditResponseType response = (RedditResponseType) requester.makeGETRequest(KARMA_API, null, null, responseType);
-    System.out.println("Response: " + response.toString());
-    System.out.println("response kind " + response.kind);
   }
 
   public String getUserName(AccessTokenInfo accessTokenInfo) {
@@ -114,20 +110,14 @@ public class RedditMessagePoster implements MessagePoster {
     requester.setReqFactory(getRequestFactory(accessTokenInfo.getAccessToken()));
     RedditIdentityResponse response = (RedditIdentityResponse) requester.makeGETRequest(IDENTITY_API, null, null,
         identityResponseType);
-    username = response.getName();
-    System.out.println("username ? " + response.getName());
+    username = response == null ? username : response.getName();
     return username;
   }
 
   public ResponseFormatter postMessage(AccessTokenInfo accessTokenInfo, String title, String message, String channel) {
-    // Map<String, String> authHeader =
-    // Requester.createAuthHeader(Requester.BEARER_AUTH_ENCODING,
-    // accessTokenInfo.getAccessToken());
     Requester requester = new Requester();
     Type submitPostResponseType = new TypeToken<RedditSubmitPostResponse>() {
     }.getType();
-    // System.out.println("Response type is " + responseType);
-    // System.out.println("Token is " + accessTokenInfo.getAccessToken());
     requester.setReqFactory(getRequestFactory(accessTokenInfo.getAccessToken()));
     Map<String, String> parameters = new HashMap<>();
     parameters.put("sr", "u_" + getUserName(accessTokenInfo));
@@ -138,15 +128,13 @@ public class RedditMessagePoster implements MessagePoster {
     data.put("resubmit", "true");
     data.put("send_replies", "true");
     data.put("api_type", "json");
-    System.out.println("Request Factory is " + requestFactory);
     RedditSubmitPostResponse response = (RedditSubmitPostResponse) requester.makePOSTRequest(SUBMIT_POST_API, data,
         parameters, null, submitPostResponseType);
-    System.out.println("Success ? " + response.success);
-    if (response.getSuccess()) {
+    if (response != null && response.getSuccess()) {
       // no errors all succeeded
-      return new ResponseFormatter(true, "");
+      return new ResponseFormatter(true, "Post submitted successfully!");
     } else {
-      return new ResponseFormatter(false, "TODO: put some error message if possible");
+      return new ResponseFormatter(false, "Post was not successful. Please, reintegrate reddit.");
     }
 
   }

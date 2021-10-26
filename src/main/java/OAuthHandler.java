@@ -29,7 +29,8 @@ public class OAuthHandler {
      * @return              true if successful.
      * @throws Exception    RedirectServer threw an exception.
      */
-    public static boolean authorizeTwitter(String apiKey, String apiSecretKey) throws Exception {
+    public static AccessTokenInfo authorizeTwitter(String apiKey, String apiSecretKey) throws Exception {
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo(null, null, null);
         RedirectServer server = new RedirectServer();
         server.startUp();
         Twitter twitter = TwitterFactory.getSingleton();
@@ -50,11 +51,17 @@ public class OAuthHandler {
         //this essentially saves the value of the second key-value pair in the URL
         String oAuthVerifier = server.getTwitterResponse().split("\\?")[1].split("\\&")[1].split("=")[1];
         server.shutDown();
-        AccessToken accessToken = twitter.getOAuthAccessToken(oAuthVerifier);
-        System.out.println("Access token: " + accessToken.getToken());
-        System.out.println("Access token secret: " + accessToken.getTokenSecret());
+
+        try {
+            AccessToken accessToken = twitter.getOAuthAccessToken(oAuthVerifier);
+            accessTokenInfo = new AccessTokenInfo(accessToken.getToken(), accessToken.getTokenSecret(), null);
+            System.out.println("Access token: " + accessToken.getToken());
+            System.out.println("Access token secret: " + accessToken.getTokenSecret());
+        } catch (Exception e) {
+            System.out.println("user has declined");
+        }
         //todo: actually save these values
-        return true;
+        return accessTokenInfo;
     }
 
     /**

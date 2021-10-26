@@ -51,7 +51,7 @@ public class RedirectServer {
 
             if (redditAuthorizationHasError(ex.getRequestURI())) {
                 // Error happened when authorizing, tell user to reauthorize
-                responsePage = FileIO.readFile(REDDIT_ERROR_PAGE);
+                responsePage = FileIO.readFile(ERROR_PAGE);
             } else {
                 // while token wait and then send the token too
                 responsePage = FileIO.readFile(REDDIT_REDIRECT_PAGE);
