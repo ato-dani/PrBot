@@ -25,7 +25,6 @@ public class AccessTokenInfo {
   public String getExpiresIn() {
     return this.expiresIn;
   }
-  
   public String getAccessTokenSecret() {
     return this.accessTokenSecret;
   }
