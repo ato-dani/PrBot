@@ -39,6 +39,15 @@ export default function GetMessage() {
             PR-Bot
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
+          <TextField
+              id="outlined-multiline-static"
+              label="Title"
+              multiline
+              rows={1}
+              defaultValue="Enter your title here"
+              autoFocus
+              fullWidth
+            />
             <TextField
               id="outlined-multiline-static"
               label="Message"
@@ -46,8 +55,7 @@ export default function GetMessage() {
               rows={4}
               defaultValue="Enter your message here"
               autoFocus
-              fullWidth
-              
+              fullWidth 
             />
             <Box
               sx={{

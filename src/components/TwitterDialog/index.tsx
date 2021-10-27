@@ -1,16 +1,18 @@
 import * as React from 'react';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-
+import {APIPath, APIParameters} from '../../config/ApiConfig';
+import { useSnackbar } from 'notistack';
+import {signIn} from '../../actions/User';
 
 export default function TwitterForm() {
   const [open, setOpen] = React.useState(false);
+  const { enqueueSnackbar} = useSnackbar();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -18,9 +20,10 @@ export default function TwitterForm() {
   const handleClose = () => {
     setOpen(false);
   };
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-
+  const [signInText, setSignInText] = React.useState("Sign in");
+  const handleSignIn =  async () => {
+    await signIn({setSignInText, url: APIPath.SIGN_IN_TWITTER, APIParameters, enqueueSnackbar});
+  }
   return (
     <div>
       <Button variant="contained" onClick={handleClickOpen}>
@@ -32,28 +35,10 @@ export default function TwitterForm() {
           <DialogContentText>
             To post your message to Twitter please sign-in to your Twitter account.
           </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            value={email}
-            id="email"
-            label="Email Address"
-            type="email"
-            onChange={e => setEmail(e.target.value)}
-            fullWidth
-            variant="standard"
-          />
-            <TextField
-            autoFocus
-            margin="dense"
-            value={password}
-            id="password"
-            label="Password"
-            type="password"
-            onChange={e => setPassword(e.target.value)}
-            fullWidth
-            variant="standard"
-          />
+          <Button onClick={() => handleSignIn()} style={{
+            backgroundColor:"#1DA1F2",
+            color:"white",
+          }}> {signInText} </Button>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>

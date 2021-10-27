@@ -1,15 +1,19 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import Prbot from "./components/PrBot";
+import { SnackbarProvider } from 'notistack';
 
 
 
 ReactDOM.render(
-<div>
+  <SnackbarProvider>
+    <div>
 
-<Prbot/>
+    <Prbot/>
 
-</div>,
+    </div>
+  </SnackbarProvider>
+,
 
   document.getElementById("root")
 );
