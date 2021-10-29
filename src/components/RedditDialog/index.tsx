@@ -8,6 +8,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import {APIPath, APIParameters} from '../../config/ApiConfig';
 import { useSnackbar } from 'notistack';
 import {signIn, submitPost} from '../../actions/User';
+import { Tooltip } from '@material-ui/core';
 
 export default function FormDialog({message, title}: {message:string, title: string}) {
   const [open, setOpen] = React.useState(false);
@@ -32,17 +33,18 @@ export default function FormDialog({message, title}: {message:string, title: str
     await signIn({setSignInText, url: APIPath.SIGN_IN_REDDIT, enqueueSnackbar, setAccessToken});
     
   }
+  console.log("title: " + (!title));
   return (
     <div>
 
       <Button variant="contained" onClick={handleClickOpen}>
         Reddit
       </Button>
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog fullWidth maxWidth={"sm"} open={open} onClose={handleClose}>
         <DialogTitle>Reddit</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            To post your message to Reddit please sign-in to your Reddit account.
+            {!accessToken && "To post your message to Reddit please sign-in to your Reddit account."}      
           </DialogContentText>
           <Button onClick={() => handleSignIn()} style={{
             backgroundColor:"#FF5700",
@@ -51,14 +53,21 @@ export default function FormDialog({message, title}: {message:string, title: str
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button 
-          variant= "contained"
-          color="secondary" 
-          onClick={submitRedditPost}
           
-          >
-            Submit
-          </Button>
+          <Tooltip title="Title, text and signing in are required">
+            <div>
+              <Button 
+              variant= "contained"
+              color="secondary" 
+              onClick={submitRedditPost}
+              disabled={(title.length === 0 || message.length === 0 || accessToken == null )}
+              >
+                Submit
+              </Button>
+            </div>
+          </Tooltip>
+          
+          
         </DialogActions>
       </Dialog>
     </div>

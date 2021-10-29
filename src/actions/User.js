@@ -5,6 +5,13 @@ import {
   ErrorResponseKey,
 } from "../config/ApiConfig";
 
+const buildQuery = (queryMap) => {
+  let query = "?";
+  Object.keys(queryMap).forEach((curQueryKey) => {
+    query += curQueryKey + "=" + queryMap[curQueryKey] + "&";
+  });
+  return query.substring(0, query.length - 1);
+};
 async function signIn({ setSignInText, url, enqueueSnackbar, setAccessToken }) {
   try {
     setSignInText?.("Signing in...");
@@ -29,7 +36,7 @@ async function signIn({ setSignInText, url, enqueueSnackbar, setAccessToken }) {
 }
 async function submitPost({ url, query, enqueueSnackbar }) {
   try {
-    const data = await axios.get(url, { params: { ...query } });
+    const data = await axios.get(url + buildQuery(query));
     const error = data?.data?.[ErrorResponseKey.ERROR];
     if (error) {
       enqueueSnackbar?.(error, { variant: "error" });
