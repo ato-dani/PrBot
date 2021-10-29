@@ -9,6 +9,10 @@ type APIParametersType = {
   TITLE: string,
   MESSAGE: string,
 };
+type SubmitResponseKeysType = {
+  SUCCESS_STATUS:string,
+  MESSAGE: string,
+}
 const APIPath: APIPathType = Object.freeze({
   SIGN_IN_REDDIT: APIbasePath + "/redditsignin",
   SIGN_IN_TWITTER: APIbasePath + "/twittersignin",
@@ -19,4 +23,12 @@ const APIParameters: APIParametersType = Object.freeze({
   TITLE: "title",
   MESSAGE: "message",
 });
-export { APIPath, APIParameters };
+const SubmitResponseKeys: SubmitResponseKeysType = Object.freeze({
+  SUCCESS_STATUS: "success_status",
+  MESSAGE: "message",
+});
+const ErrorResponseKey = Object.freeze({
+  ERROR: "error",
+})
+
+export { APIPath, APIParameters, SubmitResponseKeys, ErrorResponseKey };

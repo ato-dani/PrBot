@@ -21,6 +21,8 @@ export default function GetMessage() {
       message: data.get('message')
     });
   };
+  const [message, setMessage] = React.useState("");
+  const [title, setTitle] = React.useState("");
 
   return (
     <ThemeProvider theme={theme}>
@@ -47,6 +49,8 @@ export default function GetMessage() {
               defaultValue="Enter your title here"
               autoFocus
               fullWidth
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
             <TextField
               id="outlined-multiline-static"
@@ -56,6 +60,8 @@ export default function GetMessage() {
               defaultValue="Enter your message here"
               autoFocus
               fullWidth 
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
             />
             <Box
               sx={{
@@ -67,10 +73,10 @@ export default function GetMessage() {
                 justifyContent: "space-evenly"
               }}
             >
-            <TwitterDialog/>
-            <DiscordDialog/>
-            <RedditDialog/>
-            <EmailDialog/>
+            <TwitterDialog message={message} title={title}/>
+            <DiscordDialog message={message} title={title}/>
+            <RedditDialog message={message} title={title}/>
+            <EmailDialog message={message} title={title}/>
             </Box>
           </Box>
         </Box>

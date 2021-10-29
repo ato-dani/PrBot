@@ -8,7 +8,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 
-export default function FormDialog() {
+export default function FormDialog({message, title}: {message:string, title: string}) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {

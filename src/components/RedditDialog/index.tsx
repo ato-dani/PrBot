@@ -7,10 +7,12 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {APIPath, APIParameters} from '../../config/ApiConfig';
 import { useSnackbar } from 'notistack';
-import {signIn} from '../../actions/User';
+import {signIn, submitPost} from '../../actions/User';
 
-export default function FormDialog() {
+export default function FormDialog({message, title}: {message:string, title: string}) {
   const [open, setOpen] = React.useState(false);
+  const [signInText, setSignInText] = React.useState("Sign in");
+  const [accessToken, setAccessToken] = React.useState(null);
   const { enqueueSnackbar} = useSnackbar();
   const handleClickOpen = () => {
     setOpen(true);
@@ -18,11 +20,18 @@ export default function FormDialog() {
   const handleClose = () => {
     setOpen(false);
   };
-  const [signInText, setSignInText] = React.useState("Sign in");
-  const handleSignIn =  async () => {
-    await signIn({setSignInText, url: APIPath.SIGN_IN_REDDIT, APIParameters, enqueueSnackbar});
+  const submitRedditPost = async () => {
+    const query = {
+      [APIParameters.ACCESS_TOKEN]: accessToken,
+      [APIParameters.TITLE]: title,
+      [APIParameters.MESSAGE]: message,}
+    await submitPost({url: APIPath.SUBMIT_REDDIT, query, enqueueSnackbar,});
   }
-
+  
+  const handleSignIn =  async () => {
+    await signIn({setSignInText, url: APIPath.SIGN_IN_REDDIT, enqueueSnackbar, setAccessToken});
+    
+  }
   return (
     <div>
 
@@ -45,7 +54,8 @@ export default function FormDialog() {
           <Button 
           variant= "contained"
           color="secondary" 
-          onClick={handleClose}
+          onClick={submitRedditPost}
+          
           >
             Submit
           </Button>
