@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+//mostly based on this wonderful tutorial: https://www.baeldung.com/java-email
 public class Email {
     public String smtpHost;
     public int smtpPort;
@@ -12,10 +14,9 @@ public class Email {
     public String emailFrom;
     public Set<String> emailTo;
     //todo: something proper with username/password
-    private String emailUsername = "NULL";
-    private String emailPassword = "NULL";
+    private final String emailUsername = "NULL";
+    private final String emailPassword = "NULL";
 
-    private Properties properties = null;
     private Session session = null;
 
     public Email(String smtpHost, int smtpPort, boolean useTls, String emailFrom, Set<String> emailTo){
@@ -51,7 +52,7 @@ public class Email {
     }
 
     private void configure(){
-        properties = new Properties();
+        Properties properties = new Properties();
         properties.put("mail.smtp.auth", true);
         properties.put("mail.smtp.starttls.enable", useTls);
         properties.put("mail.smtp.host", smtpHost);
