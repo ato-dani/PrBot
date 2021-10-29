@@ -10,7 +10,6 @@ import net.dean.jraw.http.UserAgent;
 import net.dean.jraw.oauth.Credentials;
 import net.dean.jraw.oauth.OAuthHelper;
 import net.dean.jraw.oauth.StatefulAuthHelper;
-import twitter4j.conf.ConfigurationBuilder;
 
 import java.awt.*;
 import java.net.URI;
@@ -119,22 +118,4 @@ public class OAuthHandler {
         }
         return accessTokenInfo;
     }
-
-    /**
-     * Generate a nonce (random string of bytes)
-     * based on: https://mkyong.com/java/java-how-to-generate-a-random-12-bytes/
-     * @param numBytes Length of nonce in bytes
-     * @return Hex-encoded nonce string.
-     */
-    private static String generateNonce(int numBytes){
-        byte[] nonce = new byte[numBytes];
-        new SecureRandom().nextBytes(nonce);
-        StringBuilder sb = new StringBuilder();
-        for(byte b : nonce){
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    }
-
-
 }

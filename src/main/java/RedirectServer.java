@@ -27,6 +27,7 @@ public class RedirectServer {
             twitterResponse = ex.getRequestURI().toString();
             OutputStream out = ex.getResponseBody();
             String responsePage = FileIO.readFile(TWITTER_REDIRECT_PAGE);
+            assert responsePage != null;
             ex.sendResponseHeaders(200, responsePage.length());
             out.write(responsePage.getBytes(StandardCharsets.UTF_8));
         out.flush();
@@ -56,6 +57,7 @@ public class RedirectServer {
                 // while token wait and then send the token too
                 responsePage = FileIO.readFile(REDDIT_REDIRECT_PAGE);
             }
+            assert responsePage != null;
             ex.sendResponseHeaders(200, responsePage.length());
             out.write(responsePage.getBytes(StandardCharsets.UTF_8));
             out.flush();
@@ -69,11 +71,11 @@ public class RedirectServer {
     final String ERROR_PAGE = "src/main/html/error.html";
 
     private HttpServer server;
-    private TwitterAuthorizationHandler twitterAuthorizationHandler;
-    private RedditAuthorizationHandler redditAuthorizationHandler;
+    private final TwitterAuthorizationHandler twitterAuthorizationHandler;
+    private final RedditAuthorizationHandler redditAuthorizationHandler;
     private String twitterResponse = null;
     private String redditResponse = null;
-    private String redditBaseUrl = "http://localhost:1337/redditauth";
+    private final String redditBaseUrl = "http://localhost:1337/redditauth";
 
     /**
      * Generate a RedirectServer, and initialize the landing pages
