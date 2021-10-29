@@ -10,6 +10,7 @@ import net.dean.jraw.http.UserAgent;
 import net.dean.jraw.oauth.Credentials;
 import net.dean.jraw.oauth.OAuthHelper;
 import net.dean.jraw.oauth.StatefulAuthHelper;
+import twitter4j.conf.ConfigurationBuilder;
 
 import java.awt.*;
 import java.net.URI;
@@ -34,7 +35,13 @@ public class OAuthHandler {
         RedirectServer server = new RedirectServer();
         server.startUp();
         Twitter twitter = TwitterFactory.getSingleton();
-        twitter.setOAuthConsumer(apiKey, apiSecretKey);
+        try{
+            twitter.setOAuthConsumer(apiKey, apiSecretKey);
+        }
+        catch(IllegalStateException e){
+            twitter = (new TwitterFactory()).getInstance();
+            twitter.setOAuthConsumer(apiKey, apiSecretKey);
+        }
         RequestToken requestToken = twitter.getOAuthRequestToken();
         try{
             Desktop desktop = Desktop.getDesktop();
