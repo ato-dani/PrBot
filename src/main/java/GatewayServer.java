@@ -9,6 +9,8 @@ import java.net.InetSocketAddress;
 import com.google.gson.JsonObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GatewayServer {
   /**
@@ -127,12 +129,54 @@ public class GatewayServer {
     }
   }
 
+  private class EmailSubmitPostHandler implements HttpHandler {
+    /**
+     * Submit an email to list of given destination email
+     * 
+     * @param ex Incoming request
+     * @throws IOException Incapable of reading landing page HTML file
+     */
+    @Override
+    public void handle(HttpExchange ex) {
+      String smtpHost = "host";
+      int smtpPort = 587;
+      boolean useTls = false;
+      System.out.println("Submit post");
+      String query = ex.getRequestURI().getQuery();
+      String emailFrom = Requester.getQueryValue(query, "emailFrom");
+      String emailPassword = Requester.getQueryValue(query, "password");
+      String subject = Requester.getQueryValue(query, "title");
+      String text = Requester.getQueryValue(query, "message");
+      Set<String> emailTo = new HashSet<>();
+      emailTo.add("danimuneye@gmail.com");
+      Email mail = new Email(smtpHost, smtpPort, useTls, emailFrom, emailTo, emailPassword);
+      try {
+        Headers header = ex.getResponseHeaders();
+        header.add("Content-Type", String.format("application/json; charset=%s", StandardCharsets.UTF_8));
+        initHeaders(header);
+        ResponseFormatter postResponse = mail.sendEmail(subject, text);
+        System.out.println("email response: " + postResponse);
+        JsonObject postResponseJson = postResponse.getAsJsonObject();
+        String response = postResponseJson.toString();
+        System.out.println("The response to send is " + response);
+        sendResponse(ex, response);
+        ex.close();
+      } catch (Exception e) {
+        System.out.println("Exception: " + e);
+        e.printStackTrace();
+        // not send anything purposely
+        // frontend(browsers) makes second request after a timeout(possibly working
+        // then)
+      }
+    }
+  }
   final int SERVER_PORT = 1338;
 
   private HttpServer server;
   private RedditSignInHandler redditSignInHandler;
   private TwitterSignInHandler twitterSignInHandler;
   private RedditSubmitPostHandler redditSubmitPostHandler;
+  private EmailSubmitPostHandler emailSubmitPostHandler;
   private String REDDIT_CLIENT_ID = System.getenv("REDDIT_CLIENT_ID");
   private String REDDIT_CLIENT_SECRET = System.getenv("REDDIT_CLIENT_SECRET");
   private String TWITTER_CLIENT_ID = System.getenv("TWITTER_CLIENT_ID");
@@ -151,9 +195,11 @@ public class GatewayServer {
       redditSignInHandler = new RedditSignInHandler();
       twitterSignInHandler = new TwitterSignInHandler();
       redditSubmitPostHandler = new RedditSubmitPostHandler();
+      emailSubmitPostHandler = new EmailSubmitPostHandler();
       server.createContext("/redditsignin", redditSignInHandler);
       server.createContext("/twittersignin", twitterSignInHandler);
       server.createContext("/redditsubmitpost", redditSubmitPostHandler);
+      server.createContext("/emailsubmitpost", emailSubmitPostHandler);
       server.setExecutor(null);
       startUp();
     } catch (Exception e) {
