@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 
 //mostly based on this wonderful tutorial: https://www.baeldung.com/java-email
-public class Email {
+public class Email implements MessagePoster{
     public String smtpHost;
     public int smtpPort;
     public boolean useTls;
@@ -50,6 +50,25 @@ public class Email {
         Transport.send(message);
         return true;
     }
+
+    public ResponseFormatter postMessage(AccessTokenInfo accessTokenInfo, String title, String message, String channel){
+        boolean success;
+        try{
+            success = sendEmail(title, message);
+        }
+        catch(MessagingException e){
+            success = false;
+        }
+        String rfMessage;
+        if(success){
+            rfMessage = "Successfully sent Email!";
+        }
+        else{
+            rfMessage = "Failed to send Email!";
+        }
+        return new ResponseFormatter(success, rfMessage);
+    }
+
 
     private void configure(){
         Properties properties = new Properties();
