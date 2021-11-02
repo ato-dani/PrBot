@@ -7,19 +7,21 @@ import java.util.regex.Pattern;
 
 
 //mostly based on this wonderful tutorial: https://www.baeldung.com/java-email
-public class Email implements MessagePoster{
+public class EmailMessagePoster implements MessagePoster{
     public String smtpHost;
     public int smtpPort;
     public boolean useTls;
     public String emailFrom;
     public Set<String> emailTo;
     //todo: something proper with username/password
-    private final String emailUsername = "NULL";
-    private final String emailPassword = "NULL";
+    private String emailUsername = "NULL";
+    private String emailPassword = "NULL";
 
     private Session session = null;
 
-    public Email(String smtpHost, int smtpPort, boolean useTls, String emailFrom, Set<String> emailTo){
+    public EmailMessagePoster(String username, String password, String smtpHost, int smtpPort, boolean useTls, String emailFrom, Set<String> emailTo){
+        this.emailUsername = username;
+        this.emailPassword = password;
         this.smtpHost = smtpHost;
         this.smtpPort = smtpPort;
         this.useTls = useTls;
@@ -27,8 +29,6 @@ public class Email implements MessagePoster{
         this.emailTo = emailTo;
         configure();
     }
-
-    public Email(){}
 
     public boolean sendEmail(String subject, String text) throws MessagingException {
         Message message = new MimeMessage(session);
