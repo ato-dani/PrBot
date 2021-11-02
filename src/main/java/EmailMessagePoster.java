@@ -13,9 +13,8 @@ public class EmailMessagePoster implements MessagePoster{
     public boolean useTls;
     public String emailFrom;
     public Set<String> emailTo;
-    //todo: something proper with username/password
-    private String emailUsername = "NULL";
-    private String emailPassword = "NULL";
+    private String emailUsername;
+    private String emailPassword; //maybe this should be stored a bit more securely. Oh well
 
     private Session session = null;
 
@@ -70,9 +69,13 @@ public class EmailMessagePoster implements MessagePoster{
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", true);
         properties.put("mail.smtp.starttls.enable", useTls);
-        properties.put("mail.smtp.host", smtpHost);
-        properties.put("mail.smtp.port", smtpPort);
-        properties.put("mail.smtp.ssl.trust", smtpHost);
+        if(smtpHost != null && !smtpHost.equals("")) {
+            properties.put("mail.smtp.host", smtpHost);
+            properties.put("mail.smtp.ssl.trust", smtpHost);
+        }
+        if(smtpPort >= 0 && smtpPort <= 65535) {
+            properties.put("mail.smtp.port", smtpPort);
+        }
         session = Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
