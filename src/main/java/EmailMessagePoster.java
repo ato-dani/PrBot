@@ -52,21 +52,17 @@ public class EmailMessagePoster implements MessagePoster{
     }
 
     public ResponseFormatter postMessage(AccessTokenInfo accessTokenInfo, String title, String message, String channel){
-        boolean success;
         try{
-            success = sendEmail(title, message);
+            if(sendEmail(title, message)){
+                return new ResponseFormatter(true, "Successfully sent email");
+            }
+            else{
+                return new ResponseFormatter(false, "Failed to send email");
+            }
         }
         catch(MessagingException e){
-            success = false;
+            return new ResponseFormatter(false, "Failed to send email");
         }
-        String rfMessage;
-        if(success){
-            rfMessage = "Successfully sent Email!";
-        }
-        else{
-            rfMessage = "Failed to send Email!";
-        }
-        return new ResponseFormatter(success, rfMessage);
     }
 
 
