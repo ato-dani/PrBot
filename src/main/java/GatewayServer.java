@@ -9,6 +9,9 @@ import java.net.InetSocketAddress;
 import com.google.gson.JsonObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GatewayServer {
   /**
@@ -104,7 +107,7 @@ public class GatewayServer {
           return;
         }
         if (accessTokenInfo.getAccessToken() == null || title == null || message == null) {
-          String response = buildErrorJsonObject(REDDIT_SUBMIT_QUERY_ERROR).toString();
+          String response = buildErrorJsonObject(SUBMIT_QUERY_ERROR).toString();
           sendResponse(ex, response);
           ex.close();
           return;
@@ -127,17 +130,114 @@ public class GatewayServer {
     }
   }
 
+  private class TwitterSubmitPostHandler implements HttpHandler {
+    /**
+     * Submit a post to Twitter
+     * 
+     * @param ex Incoming request
+     * @throws IOException Incapable of reading landing page HTML file
+     */
+    @Override
+    public void handle(HttpExchange ex) {
+      System.out.println("Submit post");
+      String query = ex.getRequestURI().getQuery();
+      AccessTokenInfo accessTokenInfo = new AccessTokenInfo(Requester.getQueryValue(query, "access_token"),
+          Requester.getQueryValue(query, "access_token_secret"), null);
+      String title = Requester.getQueryValue(query, "title");
+      String message = Requester.getQueryValue(query, "message");
+      String channel = null;
+
+      try {
+        Headers header = ex.getResponseHeaders();
+        header.add("Content-Type", String.format("application/json; charset=%s", StandardCharsets.UTF_8));
+        initHeaders(header);
+        if (!doAPIKeysExist(TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET, ex)) {
+          System.out.println("Please first define twitter client id and secret");
+          System.out.printf("twitter client id: %s, twitter client secret: %s\n", TWITTER_CLIENT_ID,
+              TWITTER_CLIENT_SECRET);
+          return;
+        }
+        if (accessTokenInfo.getAccessToken() == null || title == null || message == null
+            || accessTokenInfo.getAccessTokenSecret() == null) {
+          String response = buildErrorJsonObject(SUBMIT_QUERY_ERROR).toString();
+          sendResponse(ex, response);
+          ex.close();
+          return;
+        }
+        TwitterMessagePoster messagePoster = new TwitterMessagePoster(accessTokenInfo);
+        ResponseFormatter postResponse = messagePoster.postMessage(accessTokenInfo, title, message, channel);
+        System.out.println("Post response: " + postResponse);
+        JsonObject postResponseJson = postResponse.getAsJsonObject();
+        String response = postResponseJson.toString();
+        System.out.println("The response to send is " + response);
+        sendResponse(ex, response);
+        ex.close();
+      } catch (Exception e) {
+        System.out.println("Exception: " + e);
+        e.printStackTrace();
+        // not send anything purposely
+        // frontend(browsers) makes second request after a timeout(possibly working
+        // then)
+      }
+    }
+  }
+
+  private class EmailSubmitPostHandler implements HttpHandler {
+    /**
+     * Submit an email to list of given destination emails
+     * 
+     * @param ex Incoming request
+     * @throws IOException Incapable of reading landing page HTML file
+     */
+    @Override
+    public void handle(HttpExchange ex) {
+      AccessTokenInfo accessTokenInfo = null;
+      String channel = null;
+      int defaultSmtpPort = 25;
+      boolean useTls = true;
+      String query = ex.getRequestURI().getQuery();
+      try {
+        String username = Requester.getQueryValue(query, "email_from");
+        String password = Requester.getQueryValue(query, "password");
+        String subject = Requester.getQueryValue(query, "title");
+        String text = Requester.getQueryValue(query, "message");
+        String smtpHost = Requester.getQueryValue(query, "smtp_server");
+        String smtpPortString = Requester.getQueryValue(query, "smtp_port");
+        int smtpPort = smtpPortString != null ? Integer.parseInt(smtpPortString) : defaultSmtpPort;
+        String destEmails = Requester.getQueryValue(query, "dest_emails");
+        Set<String> emailTo = new HashSet<>(Arrays.asList(destEmails.split(",")));
+        EmailMessagePoster mail = new EmailMessagePoster(username, password, smtpHost, smtpPort, useTls, username,
+            emailTo);
+        Headers header = ex.getResponseHeaders();
+        header.add("Content-Type", String.format("application/json; charset=%s", StandardCharsets.UTF_8));
+        initHeaders(header);
+        ResponseFormatter postResponse = mail.postMessage(accessTokenInfo, subject, text, channel);
+        JsonObject postResponseJson = postResponse.getAsJsonObject();
+        String response = postResponseJson.toString();
+        sendResponse(ex, response);
+        ex.close();
+      } catch (Exception e) {
+        System.out.println("Exception: " + e);
+        e.printStackTrace();
+        // not send anything purposely
+        // frontend(browsers) makes second request after a timeout(possibly working
+        // then)
+      }
+    }
+  }
   final int SERVER_PORT = 1338;
 
   private HttpServer server;
   private RedditSignInHandler redditSignInHandler;
   private TwitterSignInHandler twitterSignInHandler;
   private RedditSubmitPostHandler redditSubmitPostHandler;
+  private TwitterSubmitPostHandler twitterSubmitPostHandler;
+  private EmailSubmitPostHandler emailSubmitPostHandler;
   private String REDDIT_CLIENT_ID = System.getenv("REDDIT_CLIENT_ID");
   private String REDDIT_CLIENT_SECRET = System.getenv("REDDIT_CLIENT_SECRET");
   private String TWITTER_CLIENT_ID = System.getenv("TWITTER_CLIENT_ID");
   private String TWITTER_CLIENT_SECRET = System.getenv("TWITTER_CLIENT_SECRET");
-  private String REDDIT_SUBMIT_QUERY_ERROR = "Signing in, title for the post, and the posted message are required";
+  private String SUBMIT_QUERY_ERROR = "Signing in, title for the post, and the posted message are required";
   private String ERROR_KEY = "error";
 
   /**
@@ -151,9 +251,13 @@ public class GatewayServer {
       redditSignInHandler = new RedditSignInHandler();
       twitterSignInHandler = new TwitterSignInHandler();
       redditSubmitPostHandler = new RedditSubmitPostHandler();
+      twitterSubmitPostHandler = new TwitterSubmitPostHandler();
+      emailSubmitPostHandler = new EmailSubmitPostHandler();
       server.createContext("/redditsignin", redditSignInHandler);
       server.createContext("/twittersignin", twitterSignInHandler);
       server.createContext("/redditsubmitpost", redditSubmitPostHandler);
+      server.createContext("/twittersubmitpost", twitterSubmitPostHandler);
+      server.createContext("/emailsubmitpost", emailSubmitPostHandler);
       server.setExecutor(null);
       startUp();
     } catch (Exception e) {
