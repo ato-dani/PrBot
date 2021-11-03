@@ -8,15 +8,21 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
+import {APIParameters, APIPath} from '../../config/ApiConfig';
 import {Grid, Paper, Typography } from '@material-ui/core';
+import {submitPost} from '../../actions/User';
+import { useSnackbar } from 'notistack';
 
 
 export default function FormDialog({message, title}: {message:string, title: string}) {
   const [open, setOpen] = React.useState(false);
+  const [smtpServer, setSmtpServer] = React.useState("");
+  const [smtpPort, setSmtpPort] = React.useState("");
   const [emailAddress, setEmailAddress] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [destEmailAddress, setDestEmailAddress] = React.useState("");
   const [destEmails, setDestEmails] = React.useState<string []> ([]);
+  const {enqueueSnackbar} = useSnackbar();
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -28,7 +34,18 @@ export default function FormDialog({message, title}: {message:string, title: str
     setDestEmails(newDestEmails);
     setDestEmailAddress("");
   }
-  
+  const handleSubmit = async () => {
+    const query = {
+      [APIParameters.EMAIL_USERNAME]: emailAddress,
+      [APIParameters.EMAIL_PASSWORD]: password,
+      [APIParameters.TITLE]: title,
+      [APIParameters.MESSAGE]: message,
+      [APIParameters.SMTP_SERVER]: smtpServer,
+      [APIParameters.SMTP_PORT]: smtpPort,
+      [APIParameters.DEST_EMAILS]: destEmails.toString(),
+    }
+    await submitPost({url: APIPath.SUBMIT_EMAIL, query, enqueueSnackbar,});
+  }
   
   return (
     <div>
@@ -41,6 +58,28 @@ export default function FormDialog({message, title}: {message:string, title: str
           <DialogContentText>
             To send your message with Email please sign-in to your Email account.
           </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="smtp"
+            label="SMTP server"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={smtpServer}
+            onChange={(e) => setSmtpServer(e.target.value)}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="port"
+            label="Port"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={smtpPort}
+            onChange={(e) => setSmtpPort(e.target.value)}
+          />
           <TextField
             autoFocus
             margin="dense"
@@ -87,7 +126,7 @@ export default function FormDialog({message, title}: {message:string, title: str
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Submit</Button>
+          <Button disabled={(title.length === 0 || message.length === 0 || emailAddress.length === 0 || password.length === 0 || smtpPort.length === 0 || smtpServer.length === 0 || destEmails.length === 0)}onClick={handleSubmit}>Submit</Button>
         </DialogActions>
       </Dialog>
     </div>

@@ -12,13 +12,20 @@ const buildQuery = (queryMap) => {
   });
   return query.substring(0, query.length - 1);
 };
-async function signIn({ setSignInText, url, enqueueSnackbar, setAccessToken }) {
+async function signIn({
+  setSignInText,
+  url,
+  enqueueSnackbar,
+  setAccessToken,
+  setAccessTokenSecret,
+}) {
   try {
     setSignInText?.("Signing in...");
     const data = await axios.get(url);
     const error = data?.data?.[ErrorResponseKey.ERROR];
     if (error) {
-      enqueueSnackbar?.(error, {  variant: "error"  });
+      setSignInText?.("Sign in");
+      enqueueSnackbar?.(error, { variant: "error" });
       return;
     }
     if (!data?.data?.[APIParameters.ACCESS_TOKEN]) {
@@ -28,6 +35,9 @@ async function signIn({ setSignInText, url, enqueueSnackbar, setAccessToken }) {
       enqueueSnackbar?.("Sucessfully signed in!", { variant: "success" });
       setSignInText?.("Re-Sign in");
       setAccessToken?.(data?.data?.[APIParameters.ACCESS_TOKEN]);
+      if (data?.data?.[APIParameters.ACCESS_TOKEN_SECRET]) {
+        setAccessTokenSecret?.(data?.data?.[APIParameters.ACCESS_TOKEN_SECRET]);
+      }
     }
   } catch (e) {
     setSignInText?.("Sign in");

@@ -3,11 +3,19 @@ type APIPathType = {
   SIGN_IN_REDDIT: string,
   SIGN_IN_TWITTER: string,
   SUBMIT_REDDIT: string,
+  SUBMIT_TWITTER: string,
+  SUBMIT_EMAIL: string,
 };
 type APIParametersType = {
   ACCESS_TOKEN: string,
+  ACCESS_TOKEN_SECRET: string,
   TITLE: string,
   MESSAGE: string,
+  EMAIL_USERNAME: string,
+  EMAIL_PASSWORD: string,
+  DEST_EMAILS: string,
+  SMTP_SERVER: string,
+  SMTP_PORT: string,
 };
 type SubmitResponseKeysType = {
   SUCCESS_STATUS:string,
@@ -17,11 +25,19 @@ const APIPath: APIPathType = Object.freeze({
   SIGN_IN_REDDIT: APIbasePath + "/redditsignin",
   SIGN_IN_TWITTER: APIbasePath + "/twittersignin",
   SUBMIT_REDDIT: APIbasePath + "/redditsubmitpost",
+  SUBMIT_TWITTER: APIbasePath + "/twittersubmitpost",
+  SUBMIT_EMAIL: APIbasePath + "/emailsubmitpost",
 });
 const APIParameters: APIParametersType = Object.freeze({
   ACCESS_TOKEN: "access_token",
+  ACCESS_TOKEN_SECRET: "access_token_secret",
   TITLE: "title",
   MESSAGE: "message",
+  EMAIL_USERNAME: "email_from",
+  EMAIL_PASSWORD: "password",
+  DEST_EMAILS: "dest_emails",
+  SMTP_SERVER: "smtp_server",
+  SMTP_PORT: "smtp_port",
 });
 const SubmitResponseKeys: SubmitResponseKeysType = Object.freeze({
   SUCCESS_STATUS: "success_status",

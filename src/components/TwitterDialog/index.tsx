@@ -6,9 +6,9 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-import {APIPath} from '../../config/ApiConfig';
+import {APIPath, APIParameters} from '../../config/ApiConfig';
 import { useSnackbar } from 'notistack';
-import {signIn} from '../../actions/User';
+import {signIn, submitPost} from '../../actions/User';
 import { Tooltip } from '@material-ui/core';
 
 export default function TwitterForm({message, title}: {message:string, title: string}) {
@@ -16,15 +16,24 @@ export default function TwitterForm({message, title}: {message:string, title: st
   const [signInText, setSignInText] = React.useState("Sign in");
   const { enqueueSnackbar} = useSnackbar();
   const [accessToken, setAccessToken] = React.useState(null);
+  const [accessTokenSecret, setAccessTokenSecret] = React.useState(null);
   const handleClickOpen = () => {
     setOpen(true);
   };
   const handleClose = () => {
     setOpen(false);
   };
+  const submitTwitterPost = async () => {
+    const query = {
+      [APIParameters.ACCESS_TOKEN]: accessToken,
+      [APIParameters.ACCESS_TOKEN_SECRET]: accessTokenSecret,
+      [APIParameters.TITLE]: title,
+      [APIParameters.MESSAGE]: message,}
+    await submitPost({url: APIPath.SUBMIT_TWITTER, query, enqueueSnackbar,});
+    }
   
   const handleSignIn =  async () => {
-    await signIn({setSignInText, url: APIPath.SIGN_IN_TWITTER, enqueueSnackbar, setAccessToken});
+    await signIn({setSignInText, url: APIPath.SIGN_IN_TWITTER, enqueueSnackbar, setAccessToken, setAccessTokenSecret});
   }
   return (
     <div>
@@ -50,7 +59,7 @@ export default function TwitterForm({message, title}: {message:string, title: st
               variant= "contained"
               color="primary" 
               type="submit"
-              onClick={handleClose}
+              onClick={submitTwitterPost}
               disabled={(title.length === 0 || message.length === 0 || accessToken == null )}
               >
                 Submit

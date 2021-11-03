@@ -30,7 +30,7 @@ export default function FormDialog({message, title}: {message:string, title: str
   }
   
   const handleSignIn =  async () => {
-    await signIn({setSignInText, url: APIPath.SIGN_IN_REDDIT, enqueueSnackbar, setAccessToken});
+    await signIn({setSignInText, url: APIPath.SIGN_IN_REDDIT, enqueueSnackbar, setAccessToken, setAccessTokenSecret: undefined});
     
   }
   console.log("title: " + (!title));
