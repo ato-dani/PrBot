@@ -33,11 +33,12 @@ export default function FormDialog({message, title}: {message:string, title: str
     await signIn({setSignInText, url: APIPath.SIGN_IN_REDDIT, enqueueSnackbar, setAccessToken, setAccessTokenSecret: undefined});
     
   }
-  console.log("title: " + (!title));
+
   return (
     <div>
 
-      <Button variant="contained" onClick={handleClickOpen}>
+      <Button variant="contained" onClick={handleClickOpen} style={accessToken ? {backgroundColor:"#FF5700",
+            color: "white"} : {}}>
         Reddit
       </Button>
       <Dialog fullWidth maxWidth={"sm"} open={open} onClose={handleClose}>

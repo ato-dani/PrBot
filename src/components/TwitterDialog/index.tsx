@@ -37,7 +37,8 @@ export default function TwitterForm({message, title}: {message:string, title: st
   }
   return (
     <div>
-      <Button variant="contained" onClick={handleClickOpen}>
+      <Button variant="contained" onClick={handleClickOpen} style={accessToken ? {backgroundColor:"#1DA1F2",
+            color: "white"} : {}}>
         Twitter
       </Button>
       <Dialog fullWidth maxWidth={"sm"} open={open} onClose={handleClose}>
