@@ -79,10 +79,15 @@ public class RedirectServer {
 
     /**
      * Generate a RedirectServer, and initialize the landing pages
-     * @throws IOException  Invalid server port given.
      */
-    public RedirectServer() throws IOException{
-        server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
+    public RedirectServer() {
+        try {
+            server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+            e.printStackTrace();
+            System.exit(1);
+        }
         twitterAuthorizationHandler = new TwitterAuthorizationHandler();
         server.createContext("/twitterauth", twitterAuthorizationHandler);
         redditAuthorizationHandler = new RedditAuthorizationHandler();

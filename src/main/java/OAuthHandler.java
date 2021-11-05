@@ -19,7 +19,25 @@ import java.security.SecureRandom;
  * Handles the complicated OAuth2 login processes using a dummy webserver.
  */
 public class OAuthHandler {
+    private static RedirectServer server = new RedirectServer();
+    private static Credentials credentials = Credentials.webapp(System.getenv("REDDIT_CLIENT_ID"),
+            System.getenv("REDDIT_CLIENT_SECRET"), server.getRedditBaseUrl());
+    private static NetworkAdapter networkAdapter = new OkHttpNetworkAdapter(
+            new UserAgent("prBotCs321", "com.example.Prbot", "v0.1", "prbot"));
+    private static StatefulAuthHelper helper = OAuthHelper.interactive(networkAdapter, credentials);
+    private static Desktop desktop = Desktop.getDesktop();
 
+    /**
+     * Allows to change any dependencies used by the authorizeReddit method. Created
+     * to implement the dependency inversion principle.
+     */
+    public static void setAuthorizeRedditDependencies(RedirectServer newServer, NetworkAdapter newNetworkAdapter,
+            StatefulAuthHelper newHelper, Desktop newDesktop) {
+        server = newServer;
+        networkAdapter = newNetworkAdapter;
+        helper = newHelper;
+        desktop = newDesktop;
+    }
     /**
      * Login to twitter via OAuth2, and get the login access token and secret
      * based on this: https://twitter4j.org/en/code-examples.html
@@ -80,16 +98,10 @@ public class OAuthHandler {
      */
     public static AccessTokenInfo authorizeReddit(String clientId, String clientSecret) throws Exception {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo(null, null);
-        RedirectServer server = new RedirectServer();
         server.startUp();
         // System.out.println("Generate Request Url2 Called");
-        Credentials credentials = Credentials.webapp(clientId, clientSecret, server.getRedditBaseUrl());
-        UserAgent userAgent = new UserAgent("prBotCs321", "com.example.Prbot", "v0.1", "prbot");
-        NetworkAdapter networkAdapter = new OkHttpNetworkAdapter(userAgent);
-        final StatefulAuthHelper helper = OAuthHelper.interactive(networkAdapter, credentials);
         String authUrl = helper.getAuthorizationUrl(true, false, "submit", "identity");
         try {
-            Desktop desktop = Desktop.getDesktop();
             desktop.browse(new URI(authUrl));
         } catch (Exception e) {
             System.out.println("Error: " + e);
