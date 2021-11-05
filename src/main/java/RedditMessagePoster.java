@@ -72,6 +72,7 @@ public class RedditMessagePoster implements MessagePoster {
   private final String IDENTITY_API = API + "/api/v1/me";
   private final String KARMA_API = API + "/api/v1/me/karma";
   private HttpRequestFactory requestFactory;
+  public Requester requester = new Requester();
 
   public HttpRequestFactory getRequestFactory(String token) {
     if (requestFactory == null) {
@@ -89,7 +90,6 @@ public class RedditMessagePoster implements MessagePoster {
   // A sample on how to make the http request using makeGetRequestV2 and parsing
   // response
   public void sampleRequest(AccessTokenInfo accessTokenInfo) {
-    Requester requester = new Requester();
     // shows what fields there are on the returned json object, so that it parses
     // the fields
     Type responseType = new TypeToken<RedditResponseType>() {
@@ -104,7 +104,6 @@ public class RedditMessagePoster implements MessagePoster {
 
   public String getUserName(AccessTokenInfo accessTokenInfo) {
     String username = "";
-    Requester requester = new Requester();
     Type identityResponseType = new TypeToken<RedditIdentityResponse>() {
     }.getType();
     requester.setReqFactory(getRequestFactory(accessTokenInfo.getAccessToken()));
@@ -115,7 +114,6 @@ public class RedditMessagePoster implements MessagePoster {
   }
 
   public ResponseFormatter postMessage(AccessTokenInfo accessTokenInfo, String title, String message, String channel) {
-    Requester requester = new Requester();
     Type submitPostResponseType = new TypeToken<RedditSubmitPostResponse>() {
     }.getType();
     requester.setReqFactory(getRequestFactory(accessTokenInfo.getAccessToken()));
