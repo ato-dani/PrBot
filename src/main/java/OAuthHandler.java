@@ -19,13 +19,14 @@ import java.security.SecureRandom;
  * Handles the complicated OAuth2 login processes using a dummy webserver.
  */
 public class OAuthHandler {
-    private static RedirectServer server = new RedirectServer();
+
     private static Credentials credentials = Credentials.webapp(System.getenv("REDDIT_CLIENT_ID"),
-            System.getenv("REDDIT_CLIENT_SECRET"), server.getRedditBaseUrl());
+            System.getenv("REDDIT_CLIENT_SECRET"), "http://localhost:1337/redditauth");
     private static NetworkAdapter networkAdapter = new OkHttpNetworkAdapter(
             new UserAgent("prBotCs321", "com.example.Prbot", "v0.1", "prbot"));
     private static StatefulAuthHelper helper = OAuthHelper.interactive(networkAdapter, credentials);
     private static Desktop desktop = Desktop.getDesktop();
+    private static RedirectServer server = null;
 
     /**
      * Allows to change any dependencies used by the authorizeReddit method. Created
@@ -98,6 +99,10 @@ public class OAuthHandler {
      */
     public static AccessTokenInfo authorizeReddit(String clientId, String clientSecret) throws Exception {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo(null, null);
+        if (server == null) {
+            System.out.println("Server is null: " + server);
+            server = new RedirectServer();
+        }
         server.startUp();
         // System.out.println("Generate Request Url2 Called");
         String authUrl = helper.getAuthorizationUrl(true, false, "submit", "identity");
