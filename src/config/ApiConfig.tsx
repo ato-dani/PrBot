@@ -2,8 +2,10 @@ const APIbasePath = "http://localhost:1338";
 type APIPathType = {
   SIGN_IN_REDDIT: string,
   SIGN_IN_TWITTER: string,
+  SIGN_IN_DISCORD:string,
   SUBMIT_REDDIT: string,
   SUBMIT_TWITTER: string,
+  SUBMIT_DISCORD: string,
   SUBMIT_EMAIL: string,
 };
 type APIParametersType = {
@@ -24,8 +26,10 @@ type SubmitResponseKeysType = {
 const APIPath: APIPathType = Object.freeze({
   SIGN_IN_REDDIT: APIbasePath + "/redditsignin",
   SIGN_IN_TWITTER: APIbasePath + "/twittersignin",
+  SIGN_IN_DISCORD: APIbasePath + "/discordsignin",
   SUBMIT_REDDIT: APIbasePath + "/redditsubmitpost",
   SUBMIT_TWITTER: APIbasePath + "/twittersubmitpost",
+  SUBMIT_DISCORD: APIbasePath + "/discordsubmitpost",
   SUBMIT_EMAIL: APIbasePath + "/emailsubmitpost",
 });
 const APIParameters: APIParametersType = Object.freeze({

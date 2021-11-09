@@ -8,7 +8,8 @@ import {
 const buildQuery = (queryMap) => {
   let query = "?";
   Object.keys(queryMap).forEach((curQueryKey) => {
-    query += curQueryKey + "=" + queryMap[curQueryKey] + "&";
+    if (queryMap[curQueryKey].length > 0)
+      query += curQueryKey + "=" + queryMap[curQueryKey] + "&";
   });
   return query.substring(0, query.length - 1);
 };

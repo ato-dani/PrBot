@@ -11,12 +11,10 @@ import { useSnackbar } from 'notistack';
 import {signIn, submitPost} from '../../actions/User';
 import { Tooltip } from '@material-ui/core';
 
-export default function TwitterForm({message, title}: {message:string, title: string}) {
+export default function TwitterForm({message, title, accessToken, accessTokenSecret, setAccessToken, setAccessTokenSecret}: {message:string, title: string, accessToken: string, accessTokenSecret: string,  setAccessToken: React.Dispatch<React.SetStateAction<string>>, setAccessTokenSecret: React.Dispatch<React.SetStateAction<string>>}) {
   const [open, setOpen] = React.useState(false);
   const [signInText, setSignInText] = React.useState("Sign in");
   const { enqueueSnackbar} = useSnackbar();
-  const [accessToken, setAccessToken] = React.useState(null);
-  const [accessTokenSecret, setAccessTokenSecret] = React.useState(null);
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -54,14 +52,14 @@ export default function TwitterForm({message, title}: {message:string, title: st
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Tooltip title="Title, text and signing in are required">
+          <Tooltip title="Text and signing in are required">
             <div>
               <Button 
               variant= "contained"
               color="primary" 
               type="submit"
               onClick={submitTwitterPost}
-              disabled={(title.length === 0 || message.length === 0 || accessToken == null )}
+              disabled={(message.length === 0 || accessToken.length === 0 )}
               >
                 Submit
               </Button>

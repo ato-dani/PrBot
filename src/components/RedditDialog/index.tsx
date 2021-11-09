@@ -10,10 +10,9 @@ import { useSnackbar } from 'notistack';
 import {signIn, submitPost} from '../../actions/User';
 import { Tooltip } from '@material-ui/core';
 
-export default function FormDialog({message, title}: {message:string, title: string}) {
+export default function FormDialog({message, title, accessToken, setAccessToken}: {message:string, title: string, accessToken: string, setAccessToken: React.Dispatch<React.SetStateAction<string>>}) {
   const [open, setOpen] = React.useState(false);
   const [signInText, setSignInText] = React.useState("Sign in");
-  const [accessToken, setAccessToken] = React.useState(null);
   const { enqueueSnackbar} = useSnackbar();
   const handleClickOpen = () => {
     setOpen(true);
@@ -61,7 +60,7 @@ export default function FormDialog({message, title}: {message:string, title: str
               variant= "contained"
               color="secondary" 
               onClick={submitRedditPost}
-              disabled={(title.length === 0 || message.length === 0 || accessToken == null )}
+              disabled={(title.length === 0 || message.length === 0 || accessToken.length === 0 )}
               >
                 Submit
               </Button>
