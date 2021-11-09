@@ -97,9 +97,9 @@ export default function GetMessage() {
               autoFocus
               fullWidth 
               value={message}
-              onChange={(e) => {if(e.target.value.length <= 180) setMessage(e.target.value)}}
+              onChange={(e) => {if(e.target.value.length <= 280) setMessage(e.target.value)}}
             />
-            <p> {message.length} / 180</p>
+            <p> {message.length} / 280</p>
             <Box
               sx={{
                 marginTop: 8,
