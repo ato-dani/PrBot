@@ -1,7 +1,5 @@
 import java.io.*;
 import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -14,6 +12,7 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonObjectParser;
@@ -49,7 +48,7 @@ public class Requester {
     /**
      * Makes a GET request and parses the response to the response type(if it is
      * given one)
-     * 
+     *
      * @param requestUrl   The request url.
      * @param parameters   A hashmap containing the request parameters /
      *                     queries(null if it doesn't have one).
@@ -97,7 +96,7 @@ public class Requester {
     /**
      * Makes a POST request and parses the response to the response type(if it is
      * given one)
-     * 
+     *
      * @param requestUrl   The request url.
      * @param data         A hashmap containing the post data(null if it doesn't
      *                     have one).
@@ -111,8 +110,8 @@ public class Requester {
      *         above.
      */
     public Object makePOSTRequest(String requestUrl, Map<String, String> data, Map<String, String> parameters,
-                                  HttpHeaders headers, Type responseType) {
-        Object respObject = null;
+                                  HttpHeaders headers, Type responseType, boolean dataIsJson) {
+        Object respObject = new Object();
         try {
             GenericUrl url = new GenericUrl(requestUrl);
             if (parameters != null) {
@@ -120,7 +119,14 @@ public class Requester {
                     url.put(entry.getKey(), entry.getValue());
                 }
             }
-            HttpContent content = data == null ? new JsonHttpContent(new JacksonFactory(), data) : null;
+            HttpContent content = null;
+            if (dataIsJson) {
+                content = data != null ? new JsonHttpContent(new JacksonFactory(), data) : null;
+            } else {
+                content = data != null ? new UrlEncodedContent(data) : null;
+            }
+
+            // System.out.println("Content is " + content);
             HttpRequest req = initReqFactory().buildPostRequest(url, content);
             req.setParser(new JsonObjectParser(new JacksonFactory()));
             if (headers != null) {
@@ -140,6 +146,7 @@ public class Requester {
             System.out.println("Exception: " + e);
             System.out.println("Stack trace: ");
             e.printStackTrace();
+            respObject = null;
         }
 
         return respObject;
@@ -173,7 +180,7 @@ public class Requester {
     /**
      * Given the query string and the query/paramter key whose value we are looking
      * for, it returns the value assigned to that key
-     * 
+     *
      * @param query     string of parameters separated by &
      * @param queryName the key whose value we are looking for
      * @return The value of the query or null if the key was not found

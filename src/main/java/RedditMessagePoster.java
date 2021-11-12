@@ -126,10 +126,11 @@ public class RedditMessagePoster implements MessagePoster {
     parameters.put("kind", "self");
     Map<String, String> data = new HashMap<>();
     data.put("resubmit", "true");
+    data.put("content", message);
     data.put("send_replies", "true");
     data.put("api_type", "json");
     RedditSubmitPostResponse response = (RedditSubmitPostResponse) requester.makePOSTRequest(SUBMIT_POST_API, data,
-        parameters, null, submitPostResponseType);
+        parameters, null, submitPostResponseType, true);
     if (response != null && response.getSuccess()) {
       // no errors all succeeded
       return new ResponseFormatter(true, "Post submitted successfully!");
