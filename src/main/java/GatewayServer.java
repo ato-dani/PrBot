@@ -81,6 +81,39 @@ public class GatewayServer {
     }
   }
 
+  /**
+   * Integerates User Discord account with user.
+   */
+  private class DiscordSignInHandler implements HttpHandler {
+    /**
+     * Integerate user's Discord account with PrBot
+     * 
+     * @param ex Incoming request
+     * @throws IOException Incapable of reading landing page HTML file
+     */
+    @Override
+    public void handle(HttpExchange ex) {
+      AccessTokenInfo accessToken = new AccessTokenInfo(null, null);
+      try {
+        Headers header = ex.getResponseHeaders();
+        header.add("Content-Type", String.format("application/json; charset=%s", StandardCharsets.UTF_8));
+        initHeaders(header);
+        if (!doAPIKeysExist(DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, ex)) {
+          System.out.println("Please first define Discord client id and secret");
+          System.out.printf("Discord client id: %s, Discord client secret: %s\n", DISCORD_CLIENT_ID,
+              DISCORD_CLIENT_SECRET);
+          return;
+        }
+        accessToken = OAuthHandler.authorizeDiscord(DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET);
+        String response = accessToken.getAsJsonObject().toString();
+        sendResponse(ex, response);
+        ex.close();
+      } catch (Exception e) {
+        System.out.println("Exception: " + e);
+        e.printStackTrace();
+      }
+    }
+  }
   private class RedditSubmitPostHandler implements HttpHandler {
     /**
      * Submit a post to Reddit
@@ -157,7 +190,7 @@ public class GatewayServer {
               TWITTER_CLIENT_SECRET);
           return;
         }
-        if (accessTokenInfo.getAccessToken() == null || title == null || message == null
+        if (accessTokenInfo.getAccessToken() == null || message == null
             || accessTokenInfo.getAccessTokenSecret() == null) {
           String response = buildErrorJsonObject(SUBMIT_QUERY_ERROR).toString();
           sendResponse(ex, response);
@@ -182,6 +215,56 @@ public class GatewayServer {
     }
   }
 
+  private class DiscordSubmitPostHandler implements HttpHandler {
+    /**
+     * Submit a post to Discord
+     * 
+     * @param ex Incoming request
+     * @throws IOException Incapable of reading landing page HTML file
+     */
+    @Override
+    public void handle(HttpExchange ex) {
+      String query = ex.getRequestURI().getQuery();
+      AccessTokenInfo accessTokenInfo = new AccessTokenInfo(Requester.getQueryValue(query, "access_token"),
+          Requester.getQueryValue(query, "access_token_secret"), null);
+      String title = Requester.getQueryValue(query, "title");
+      String message = Requester.getQueryValue(query, "message");
+      String channel = null;
+
+      try {
+        Headers header = ex.getResponseHeaders();
+        header.add("Content-Type", String.format("application/json; charset=%s", StandardCharsets.UTF_8));
+        initHeaders(header);
+        if (!doAPIKeysExist(DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, ex)) {
+          System.out.println("Please first define Discord client id and secret");
+          System.out.printf("discord client id: %s, discord client secret: %s\n", DISCORD_CLIENT_ID,
+              DISCORD_CLIENT_SECRET);
+          return;
+        }
+        if (accessTokenInfo.getAccessToken() == null || message == null
+            || accessTokenInfo.getAccessTokenSecret() == null) {
+          String response = buildErrorJsonObject(SUBMIT_QUERY_ERROR).toString();
+          sendResponse(ex, response);
+          ex.close();
+          return;
+        }
+        DiscordMessagePoster messagePoster = new DiscordMessagePoster();
+        ResponseFormatter postResponse = messagePoster.postMessage(accessTokenInfo, title, message, channel);
+        System.out.println("Post response: " + postResponse);
+        JsonObject postResponseJson = postResponse.getAsJsonObject();
+        String response = postResponseJson.toString();
+        System.out.println("The response to send is " + response);
+        sendResponse(ex, response);
+        ex.close();
+      } catch (Exception e) {
+        System.out.println("Exception: " + e);
+        e.printStackTrace();
+        // not send anything purposely
+        // frontend(browsers) makes second request after a timeout(possibly working
+        // then)
+      }
+    }
+  }
   private class EmailSubmitPostHandler implements HttpHandler {
     /**
      * Submit an email to list of given destination emails
@@ -230,13 +313,17 @@ public class GatewayServer {
   private HttpServer server;
   private RedditSignInHandler redditSignInHandler;
   private TwitterSignInHandler twitterSignInHandler;
+  private DiscordSignInHandler discordSignInHandler;
   private RedditSubmitPostHandler redditSubmitPostHandler;
   private TwitterSubmitPostHandler twitterSubmitPostHandler;
+  private DiscordSubmitPostHandler discordSubmitPostHandler;
   private EmailSubmitPostHandler emailSubmitPostHandler;
   private String REDDIT_CLIENT_ID = System.getenv("REDDIT_CLIENT_ID");
   private String REDDIT_CLIENT_SECRET = System.getenv("REDDIT_CLIENT_SECRET");
   private String TWITTER_CLIENT_ID = System.getenv("TWITTER_CLIENT_ID");
   private String TWITTER_CLIENT_SECRET = System.getenv("TWITTER_CLIENT_SECRET");
+  private String DISCORD_CLIENT_ID = System.getenv("DISCORD_CLIENT_ID");
+  private String DISCORD_CLIENT_SECRET = System.getenv("DISCORD_CLIENT_SECRET");
   private String SUBMIT_QUERY_ERROR = "Signing in, title for the post, and the posted message are required";
   private String ERROR_KEY = "error";
 
@@ -250,13 +337,17 @@ public class GatewayServer {
       server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
       redditSignInHandler = new RedditSignInHandler();
       twitterSignInHandler = new TwitterSignInHandler();
+      discordSignInHandler = new DiscordSignInHandler();
       redditSubmitPostHandler = new RedditSubmitPostHandler();
       twitterSubmitPostHandler = new TwitterSubmitPostHandler();
       emailSubmitPostHandler = new EmailSubmitPostHandler();
+      discordSubmitPostHandler = new DiscordSubmitPostHandler();
       server.createContext("/redditsignin", redditSignInHandler);
       server.createContext("/twittersignin", twitterSignInHandler);
+      server.createContext("/discordsignin", discordSignInHandler);
       server.createContext("/redditsubmitpost", redditSubmitPostHandler);
       server.createContext("/twittersubmitpost", twitterSubmitPostHandler);
+      server.createContext("/discordsubmitpost", discordSubmitPostHandler);
       server.createContext("/emailsubmitpost", emailSubmitPostHandler);
       server.setExecutor(null);
       startUp();

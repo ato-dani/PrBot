@@ -1,21 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
-import java.lang.reflect.Type;
-
-import com.google.api.client.util.Key;
-import com.google.common.reflect.TypeToken;
 
 public class DiscordMessagePoster implements MessagePoster {
-
-
-    public static class DiscordTokenResponse {
-        @Key
-        public Boolean success;
-
-        public Boolean getSuccess() {
-            return success;
-        }
-    }
 
     private final String API_ENDPOINT = "https://discord.com/api/v8";
     private final String SUBMIT_POST_API = API_ENDPOINT + "/webhooks";
@@ -28,8 +14,6 @@ public class DiscordMessagePoster implements MessagePoster {
         }
 
         Requester requester = new Requester();
-        Type discordTokenResponseType = new TypeToken<DiscordTokenResponse>() {
-        }.getType();
         String discordToken = accessTokenInfo.getAccessToken();
         String discordIdSecret = accessTokenInfo.getAccessTokenSecret();
         String finalPostApi = SUBMIT_POST_API + "/" + discordIdSecret + "/" + discordToken;
@@ -37,10 +21,9 @@ public class DiscordMessagePoster implements MessagePoster {
         //Discord doesn't require title or channel using webhooks.
         Map<String, String> data = new HashMap<>();
         data.put("content", message);
-        DiscordTokenResponse response = (DiscordTokenResponse) requester.makePOSTRequest(finalPostApi, data,
-                null, null, discordTokenResponseType, true);
+        Object response = requester.makePOSTRequest(finalPostApi, data, null, null, null, true);
 
-        if( response!= null && response.getSuccess()){
+        if (response != null) {
             return new ResponseFormatter(true, "Discord post submitted successfully!");
         } else {
             return new ResponseFormatter(false, "Discord was not successful. Please, reintegrate.");

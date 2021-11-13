@@ -235,10 +235,5 @@ public class OAuthHandler {
     }
 
     public static void main(String args[]) {
-        try {
-            authorizeDiscord("903414150628274227", "J1kTIxIk8M4-WsEB6d8tSaSGWxw23dOF");
-        } catch (Exception e) {
-            System.out.println("Exception in main: " + e);
-        }
     }
 }
