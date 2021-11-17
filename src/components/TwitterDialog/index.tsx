@@ -59,6 +59,7 @@ export default function TwitterForm({message, title, accessToken, accessTokenSec
               color="primary" 
               type="submit"
               onClick={submitTwitterPost}
+              data-testid= "submit"
               disabled={(message.length === 0 || accessToken.length === 0 )}
               >
                 Submit

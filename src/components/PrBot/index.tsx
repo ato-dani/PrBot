@@ -73,7 +73,7 @@ export default function GetMessage() {
             PR-Bot
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
-            <Tooltip title = "Title only used by Discord and Email">
+            <Tooltip title = "Title only used by Reddit and Email">
               <TextField
                 id="outlined-multiline-static"
                 label="Title"
@@ -83,6 +83,7 @@ export default function GetMessage() {
                 autoFocus
                 fullWidth
                 value={title}
+                inputProps={{"data-testid": "title"}}
                 onChange={(e) => {if(e.target.value.length <= 300) setTitle(e.target.value)}}
               />
             </Tooltip>
@@ -97,6 +98,7 @@ export default function GetMessage() {
               autoFocus
               fullWidth 
               value={message}
+              inputProps={{"data-testid": "message"}}
               onChange={(e) => {if(e.target.value.length <= 280) setMessage(e.target.value)}}
             />
             <p> {message.length} / 280</p>

@@ -62,6 +62,7 @@ export default function FormDialog({message, title}: {message:string, title: str
             autoFocus
             margin="dense"
             id="smtp"
+            inputProps={{"data-testid": "smtpServer"}}
             label="SMTP server"
             type="text"
             fullWidth
@@ -73,6 +74,7 @@ export default function FormDialog({message, title}: {message:string, title: str
             autoFocus
             margin="dense"
             id="port"
+            inputProps={{"data-testid": "smtpPort"}}
             label="Port"
             type="text"
             fullWidth
@@ -84,6 +86,7 @@ export default function FormDialog({message, title}: {message:string, title: str
             autoFocus
             margin="dense"
             id="name"
+            inputProps={{"data-testid": "emailAddress"}}
             label="Email Address"
             type="email"
             fullWidth
@@ -95,6 +98,7 @@ export default function FormDialog({message, title}: {message:string, title: str
             autoFocus
             margin="dense"
             id="name"
+            inputProps={{"data-testid": "password"}}
             label="Password"
             type="password"
             fullWidth
@@ -108,6 +112,7 @@ export default function FormDialog({message, title}: {message:string, title: str
               autoFocus
               margin="dense"
               id="name"
+              inputProps={{"data-testid": "destEmailAddress"}}
               label="Destination Email Address"
               type="email"
               fullWidth
@@ -119,7 +124,7 @@ export default function FormDialog({message, title}: {message:string, title: str
             <Grid item lg={4}>
               <Tooltip title="Please enter a valid destination email address">
                 <div>
-                <Button style={{color:"red",  width:"100%", margin:"20px 0px 0px 0px"}} disabled={destEmailAddress.length === 0} onClick={(e) => addEmail(e, destEmailAddress)}>
+                <Button style={{color:"red",  width:"100%", margin:"20px 0px 0px 0px"}} disabled={destEmailAddress.length === 0} onClick={(e) => addEmail(e, destEmailAddress)} data-testid="addEmail">
                   Add Email
                 </Button>
                 </div>
@@ -132,7 +137,7 @@ export default function FormDialog({message, title}: {message:string, title: str
           <Button onClick={handleClose}>Cancel</Button>
           <Tooltip title="Title, text, SMTP host, SMTP port, email address, password and at least one dest email are required">
             <div>
-            <Button disabled={(title.length === 0 || message.length === 0 || emailAddress.length === 0 || password.length === 0 || smtpPort.length === 0 || smtpServer.length === 0 || destEmails.length === 0)}onClick={handleSubmit}>Submit</Button>
+            <Button disabled={(title.length === 0 || message.length === 0 || emailAddress.length === 0 || password.length === 0 || smtpPort.length === 0 || smtpServer.length === 0 || destEmails.length === 0)}onClick={handleSubmit} data-testid={"submit"}>Submit</Button>
             </div>
           </Tooltip>
         </DialogActions>
